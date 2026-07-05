@@ -313,50 +313,50 @@ export default function AdminPage() {
 
   if (!isAuthenticated) {
     return (
-      <main className="flex min-h-screen items-center justify-center bg-slate-100 px-4 py-8">
-        <div className="w-full max-w-md rounded-3xl border border-slate-200 bg-white p-8 shadow-sm">
-          <p className="text-sm font-semibold uppercase tracking-[0.3em] text-cyan-700">Admin Portal</p>
-          <h1 className="mt-2 text-2xl font-semibold">Staff Sign In</h1>
+      <main className="flex min-h-screen items-center justify-center bg-slate-50 px-4 py-8">
+        <div className="w-full max-w-md border border-slate-200 bg-white p-6">
+          <p className="text-xs font-semibold uppercase text-slate-500">Admin Portal</p>
+          <h1 className="mt-2 text-2xl font-semibold text-slate-950">Staff Sign In</h1>
           <p className="mt-2 text-sm text-slate-600">Sign in to access the screening queue.</p>
           <form onSubmit={handleLogin} className="mt-6 space-y-4">
             <label className="block text-sm font-medium">
               <span className="mb-1 block">Email</span>
-              <input value={email} onChange={(e) => setEmail(e.target.value)} className="w-full rounded-xl border border-slate-300 px-4 py-3 outline-none focus:border-cyan-500" placeholder="admin@example.com" />
+              <input value={email} onChange={(e) => setEmail(e.target.value)} className="w-full border border-slate-300 px-3 py-2.5 outline-none focus:border-slate-900" placeholder="admin@example.com" />
             </label>
             <label className="block text-sm font-medium">
               <span className="mb-1 block">Password</span>
-              <input type="password" value={password} onChange={(e) => setPassword(e.target.value)} className="w-full rounded-xl border border-slate-300 px-4 py-3 outline-none focus:border-cyan-500" placeholder="Password" />
+              <input type="password" value={password} onChange={(e) => setPassword(e.target.value)} className="w-full border border-slate-300 px-3 py-2.5 outline-none focus:border-slate-900" placeholder="Password" />
             </label>
-            <button className="w-full rounded-2xl bg-cyan-700 px-5 py-3 font-semibold text-white hover:bg-cyan-800">Sign In</button>
+            <button className="w-full bg-slate-900 px-5 py-3 font-semibold text-white hover:bg-slate-800">Sign In</button>
           </form>
-          {statusMessage ? <p className="mt-4 text-sm text-cyan-800">{statusMessage}</p> : null}
+          {statusMessage ? <p className="mt-4 border border-slate-200 bg-slate-50 px-3 py-2 text-sm text-slate-800">{statusMessage}</p> : null}
         </div>
       </main>
     );
   }
 
   return (
-    <main className="min-h-screen bg-slate-100 px-4 py-8 text-slate-900">
-      <div className="mx-auto max-w-7xl rounded-3xl border border-slate-200 bg-white p-6 shadow-sm">
-        <div className="mb-6 flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
+    <main className="min-h-screen bg-slate-50 px-4 py-6 text-slate-900">
+      <div className="mx-auto max-w-7xl border border-slate-200 bg-white p-5">
+        <div className="mb-5 flex flex-col gap-3 border-b border-slate-200 pb-4 md:flex-row md:items-center md:justify-between">
           <div>
-            <p className="text-sm font-semibold uppercase tracking-[0.3em] text-cyan-700">Admin Portal</p>
-            <h1 className="text-3xl font-semibold">Patient Screening Queue</h1>
+            <p className="text-xs font-semibold uppercase text-slate-500">Admin Portal</p>
+            <h1 className="text-2xl font-semibold text-slate-950">Patient Screening Queue</h1>
           </div>
-          <a href="/" className="text-sm font-medium text-cyan-700 hover:text-cyan-900">Back to customer form</a>
+          <a href="/" className="text-sm font-medium text-slate-700 hover:text-slate-950">Back to customer form</a>
         </div>
 
-        {statusMessage ? <div className="mb-4 rounded-xl border border-cyan-200 bg-cyan-50 p-3 text-sm text-cyan-900">{statusMessage}</div> : null}
+        {statusMessage ? <div className="mb-4 border border-slate-300 bg-slate-50 p-3 text-sm text-slate-900">{statusMessage}</div> : null}
 
         <div className="grid gap-6 lg:grid-cols-[0.9fr_1.1fr]">
-          <aside className="rounded-2xl border border-slate-200 bg-slate-50 p-4">
+          <aside className="border border-slate-200 bg-slate-50 p-4">
             <h2 className="mb-3 text-lg font-semibold">Queue</h2>
             <div className="space-y-2">
               {registrations.map((entry) => (
                 <button
                   key={entry.id}
                   onClick={() => handleSelectPatient(entry)}
-                  className={`w-full rounded-xl border px-4 py-3 text-left ${selected?.id === entry.id ? 'border-cyan-500 bg-cyan-50' : 'border-slate-200 bg-white'}`}
+                  className={`w-full border px-3 py-2.5 text-left ${selected?.id === entry.id ? 'border-slate-900 bg-white' : 'border-slate-200 bg-white hover:border-slate-400'}`}
                 >
                   <div className="flex items-center justify-between gap-2">
                     <span className="font-semibold">{entry.name}</span>
@@ -368,7 +368,7 @@ export default function AdminPage() {
             </div>
           </aside>
 
-          <section className="rounded-2xl border border-slate-200 p-5">
+          <section className="border border-slate-200 p-5">
             {selected ? (
               <>
                 <div className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
@@ -380,30 +380,30 @@ export default function AdminPage() {
                     <p className="text-sm text-slate-600">Submitted {formatTime(selected.createdAt)}</p>
                   </div>
                   <div className="flex flex-wrap items-center gap-2">
-                    <span className="rounded-full bg-emerald-100 px-3 py-1 text-sm font-medium text-emerald-700">{selected.status}</span>
-                    <button disabled={isSendingWhatsapp} onClick={() => void handleAssessmentLink()} className="rounded-full border border-cyan-200 px-3 py-1 text-sm font-medium text-cyan-700 hover:bg-cyan-50 disabled:cursor-not-allowed disabled:opacity-60">{isSendingWhatsapp ? 'Sending...' : 'Send assessment link'}</button>
-                    <button disabled={isSendingReportWhatsapp} onClick={() => void handleReportWhatsapp()} className="rounded-full border border-amber-200 px-3 py-1 text-sm font-medium text-amber-700 hover:bg-amber-50 disabled:cursor-not-allowed disabled:opacity-60">{isSendingReportWhatsapp ? 'Sending...' : 'Send report'}</button>
-                    <button disabled={isSyncingAssessment} onClick={() => void handleSyncAssessment()} className="rounded-full border border-violet-200 px-3 py-1 text-sm font-medium text-violet-700 hover:bg-violet-50 disabled:cursor-not-allowed disabled:opacity-60">{isSyncingAssessment ? 'Syncing...' : 'Sync assessment'}</button>
-                    <button onClick={() => void handleUpdateStatus('ASSESSMENT IN PROGRESS')} className="rounded-full border border-slate-300 px-3 py-1 text-sm font-medium text-slate-700 hover:bg-slate-50">Mark in progress</button>
-                    <button onClick={() => void handleUpdateStatus('READY FOR DOCTOR REVIEW')} className="rounded-full border border-emerald-500 px-3 py-1 text-sm font-medium text-emerald-700 hover:bg-emerald-50">Ready for review</button>
+                    <span className="border border-slate-300 bg-slate-50 px-3 py-1 text-sm font-medium text-slate-700">{selected.status}</span>
+                    <button disabled={isSendingWhatsapp} onClick={() => void handleAssessmentLink()} className="border border-slate-300 px-3 py-1 text-sm font-medium text-slate-700 hover:border-slate-900 disabled:cursor-not-allowed disabled:opacity-60">{isSendingWhatsapp ? 'Sending...' : 'Send assessment link'}</button>
+                    <button disabled={isSendingReportWhatsapp} onClick={() => void handleReportWhatsapp()} className="border border-slate-300 px-3 py-1 text-sm font-medium text-slate-700 hover:border-slate-900 disabled:cursor-not-allowed disabled:opacity-60">{isSendingReportWhatsapp ? 'Sending...' : 'Send report'}</button>
+                    <button disabled={isSyncingAssessment} onClick={() => void handleSyncAssessment()} className="border border-slate-300 px-3 py-1 text-sm font-medium text-slate-700 hover:border-slate-900 disabled:cursor-not-allowed disabled:opacity-60">{isSyncingAssessment ? 'Syncing...' : 'Sync assessment'}</button>
+                    <button onClick={() => void handleUpdateStatus('ASSESSMENT IN PROGRESS')} className="border border-slate-300 px-3 py-1 text-sm font-medium text-slate-700 hover:border-slate-900">Mark in progress</button>
+                    <button onClick={() => void handleUpdateStatus('READY FOR DOCTOR REVIEW')} className="border border-slate-900 bg-slate-900 px-3 py-1 text-sm font-medium text-white hover:bg-slate-800">Ready for review</button>
                   </div>
                 </div>
 
                 <div className="mt-6 grid gap-4 md:grid-cols-2">
-                  <div className="rounded-xl bg-slate-50 p-4">
+                  <div className="border border-slate-200 bg-slate-50 p-4">
                     <p className="text-sm text-slate-500">Age</p>
                     <p className="text-lg font-semibold">{selected.age}</p>
                   </div>
-                  <div className="rounded-xl bg-slate-50 p-4">
+                  <div className="border border-slate-200 bg-slate-50 p-4">
                     <p className="text-sm text-slate-500">Gender</p>
                     <p className="text-lg font-semibold">{selected.gender}</p>
                   </div>
                 </div>
 
-                <div className="mt-6 rounded-2xl border border-slate-200 bg-slate-50 p-4">
+                <div className="mt-6 border border-slate-200 bg-slate-50 p-4">
                   <div className="mb-4 flex items-center justify-between">
                     <h3 className="text-lg font-semibold">Vitals & Screening</h3>
-                    <span className={`rounded-full border px-3 py-1 text-sm font-medium ${getBloodPressureBadgeClasses(bpCategory)}`}>{bpCategory || 'Awaiting values'}</span>
+                    <span className={`border px-3 py-1 text-sm font-medium ${getBloodPressureBadgeClasses(bpCategory)}`}>{bpCategory || 'Awaiting values'}</span>
                   </div>
                   <div className="grid gap-4 md:grid-cols-2">
                     <label className="block text-sm font-medium">
@@ -413,7 +413,7 @@ export default function AdminPage() {
                         inputMode="numeric"
                         value={systolic}
                         onChange={(event) => setSystolic(event.target.value)}
-                        className="w-full rounded-xl border border-slate-300 px-3 py-2"
+                        className="w-full border border-slate-300 bg-white px-3 py-2 outline-none focus:border-slate-900"
                         placeholder="e.g. 120"
                       />
                       {systolicError ? <span className="mt-1 block text-sm text-red-600">{systolicError}</span> : null}
@@ -425,7 +425,7 @@ export default function AdminPage() {
                         inputMode="numeric"
                         value={diastolic}
                         onChange={(event) => setDiastolic(event.target.value)}
-                        className="w-full rounded-xl border border-slate-300 px-3 py-2"
+                        className="w-full border border-slate-300 bg-white px-3 py-2 outline-none focus:border-slate-900"
                         placeholder="e.g. 80"
                       />
                       {diastolicError ? <span className="mt-1 block text-sm text-red-600">{diastolicError}</span> : null}
@@ -433,7 +433,7 @@ export default function AdminPage() {
                   </div>
 
                   {systolic && diastolic && !systolicError && !diastolicError && (Number(systolic) > 180 || Number(diastolic) > 120) ? (
-                    <div className="mt-4 rounded-xl border border-rose-300 bg-rose-50 p-4 text-sm text-rose-800">
+                    <div className="mt-4 border border-rose-300 bg-rose-50 p-4 text-sm text-rose-800">
                       <p className="font-semibold">Are you currently experiencing any of these symptoms?</p>
                       <div className="mt-3 grid gap-2 md:grid-cols-2">
                         {symptomOptions.map((option) => (
@@ -474,7 +474,7 @@ export default function AdminPage() {
                         type="tel"
                         value={whatsappNumber}
                         onChange={(event) => setWhatsappNumber(event.target.value)}
-                        className="w-full rounded-xl border border-slate-300 px-3 py-2"
+                        className="w-full border border-slate-300 bg-white px-3 py-2 outline-none focus:border-slate-900"
                         placeholder="+91 98765 43210"
                       />
                     </label>
@@ -485,7 +485,7 @@ export default function AdminPage() {
                         inputMode="numeric"
                         value={heightCm}
                         onChange={(event) => setHeightCm(event.target.value)}
-                        className="w-full rounded-xl border border-slate-300 px-3 py-2"
+                        className="w-full border border-slate-300 bg-white px-3 py-2 outline-none focus:border-slate-900"
                         placeholder="168"
                       />
                     </label>
@@ -496,7 +496,7 @@ export default function AdminPage() {
                         inputMode="numeric"
                         value={weightKg}
                         onChange={(event) => setWeightKg(event.target.value)}
-                        className="w-full rounded-xl border border-slate-300 px-3 py-2"
+                        className="w-full border border-slate-300 bg-white px-3 py-2 outline-none focus:border-slate-900"
                         placeholder="78"
                       />
                     </label>
@@ -507,25 +507,25 @@ export default function AdminPage() {
                         inputMode="numeric"
                         value={waistCm}
                         onChange={(event) => setWaistCm(event.target.value)}
-                        className="w-full rounded-xl border border-slate-300 px-3 py-2"
+                        className="w-full border border-slate-300 bg-white px-3 py-2 outline-none focus:border-slate-900"
                         placeholder="90"
                       />
                     </label>
                   </div>
 
                   <div className="mt-4 grid gap-4 md:grid-cols-3">
-                    <div className="rounded-xl border border-slate-200 bg-white p-4">
+                    <div className="border border-slate-200 bg-white p-4">
                       <p className="text-sm text-slate-500">BMI</p>
                       <p className="text-lg font-semibold">{bmiValue ?? '—'}</p>
                       <p className="text-sm text-slate-600">{bmiCategory}</p>
-                      <span className={`mt-2 inline-flex rounded-full border px-2 py-1 text-xs font-semibold ${bmiStatus.tone === 'green' ? 'border-emerald-200 bg-emerald-50 text-emerald-700' : bmiStatus.tone === 'amber' ? 'border-amber-200 bg-amber-50 text-amber-700' : bmiStatus.tone === 'red' ? 'border-red-200 bg-red-50 text-red-700' : 'border-slate-200 bg-slate-50 text-slate-600'}`}>{bmiStatus.label}</span>
+                      <span className={`mt-2 inline-flex border px-2 py-1 text-xs font-semibold ${bmiStatus.tone === 'green' ? 'border-emerald-200 bg-emerald-50 text-emerald-700' : bmiStatus.tone === 'amber' ? 'border-amber-200 bg-amber-50 text-amber-700' : bmiStatus.tone === 'red' ? 'border-red-200 bg-red-50 text-red-700' : 'border-slate-200 bg-slate-50 text-slate-600'}`}>{bmiStatus.label}</span>
                     </div>
-                    <div className="rounded-xl border border-slate-200 bg-white p-4">
+                    <div className="border border-slate-200 bg-white p-4">
                       <p className="text-sm text-slate-500">BRI</p>
                       <p className="text-lg font-semibold">{briValue ?? '—'}</p>
-                      <span className={`mt-2 inline-flex rounded-full border px-2 py-1 text-xs font-semibold ${briStatus.tone === 'green' ? 'border-emerald-200 bg-emerald-50 text-emerald-700' : briStatus.tone === 'amber' ? 'border-amber-200 bg-amber-50 text-amber-700' : briStatus.tone === 'red' ? 'border-red-200 bg-red-50 text-red-700' : 'border-slate-200 bg-slate-50 text-slate-600'}`}>{briStatus.label}</span>
+                      <span className={`mt-2 inline-flex border px-2 py-1 text-xs font-semibold ${briStatus.tone === 'green' ? 'border-emerald-200 bg-emerald-50 text-emerald-700' : briStatus.tone === 'amber' ? 'border-amber-200 bg-amber-50 text-amber-700' : briStatus.tone === 'red' ? 'border-red-200 bg-red-50 text-red-700' : 'border-slate-200 bg-slate-50 text-slate-600'}`}>{briStatus.label}</span>
                     </div>
-                    <div className="rounded-xl border border-slate-200 bg-white p-4">
+                    <div className="border border-slate-200 bg-white p-4">
                       <p className="text-sm text-slate-500">Assessment</p>
                       <p className="text-lg font-semibold">{selected.assessmentAnalysis?.riskLevel || bpCategory || 'Pending'}</p>
                       <p className="text-sm text-slate-600">{selected.assessmentAnalysis ? selected.assessmentAnalysis.summary : 'Blood pressure classification'}</p>
@@ -539,17 +539,17 @@ export default function AdminPage() {
                     value={notes}
                     onChange={(e) => setNotes(e.target.value)}
                     rows={5}
-                    className="w-full rounded-xl border border-slate-300 px-4 py-3 outline-none focus:border-cyan-500"
+                    className="w-full border border-slate-300 px-3 py-2.5 outline-none focus:border-slate-900"
                     placeholder="Record screening notes"
                   />
                 </label>
 
                 <div className="mt-6 flex flex-wrap gap-3">
-                  <button onClick={saveScreeningDetails} className="rounded-2xl bg-cyan-700 px-5 py-3 font-semibold text-white hover:bg-cyan-800">Save Screening</button>
-                  <button disabled={isSendingWhatsapp} onClick={() => void handleWhatsapp()} className="rounded-2xl border border-emerald-500 px-5 py-3 font-semibold text-emerald-700 hover:bg-emerald-50 disabled:cursor-not-allowed disabled:opacity-60">{isSendingWhatsapp ? 'Sending...' : 'Send to WhatsApp'}</button>
-                  <button disabled={isSyncingAssessment} onClick={() => void handleSyncAssessment()} className="rounded-2xl border border-violet-500 px-5 py-3 font-semibold text-violet-700 hover:bg-violet-50 disabled:cursor-not-allowed disabled:opacity-60">{isSyncingAssessment ? 'Syncing...' : 'Sync assessment'}</button>
-                  <button disabled={isSyncingAssessment} onClick={() => void handlePdf()} className="rounded-2xl border border-slate-300 px-5 py-3 font-semibold text-slate-700 hover:bg-slate-50 disabled:cursor-not-allowed disabled:opacity-60">{isSyncingAssessment ? 'Preparing...' : 'Generate final PDF'}</button>
-                  <button disabled={isSendingReportWhatsapp} onClick={() => void handleReportWhatsapp()} className="rounded-2xl border border-amber-500 px-5 py-3 font-semibold text-amber-700 hover:bg-amber-50 disabled:cursor-not-allowed disabled:opacity-60">{isSendingReportWhatsapp ? 'Sending...' : 'Send report to WhatsApp'}</button>
+                  <button onClick={saveScreeningDetails} className="bg-slate-900 px-4 py-2.5 font-semibold text-white hover:bg-slate-800">Save Screening</button>
+                  <button disabled={isSendingWhatsapp} onClick={() => void handleWhatsapp()} className="border border-slate-300 px-4 py-2.5 font-semibold text-slate-700 hover:border-slate-900 disabled:cursor-not-allowed disabled:opacity-60">{isSendingWhatsapp ? 'Sending...' : 'Send to WhatsApp'}</button>
+                  <button disabled={isSyncingAssessment} onClick={() => void handleSyncAssessment()} className="border border-slate-300 px-4 py-2.5 font-semibold text-slate-700 hover:border-slate-900 disabled:cursor-not-allowed disabled:opacity-60">{isSyncingAssessment ? 'Syncing...' : 'Sync assessment'}</button>
+                  <button disabled={isSyncingAssessment} onClick={() => void handlePdf()} className="border border-slate-300 px-4 py-2.5 font-semibold text-slate-700 hover:border-slate-900 disabled:cursor-not-allowed disabled:opacity-60">{isSyncingAssessment ? 'Preparing...' : 'Generate final PDF'}</button>
+                  <button disabled={isSendingReportWhatsapp} onClick={() => void handleReportWhatsapp()} className="border border-slate-300 px-4 py-2.5 font-semibold text-slate-700 hover:border-slate-900 disabled:cursor-not-allowed disabled:opacity-60">{isSendingReportWhatsapp ? 'Sending...' : 'Send report to WhatsApp'}</button>
                 </div>
               </>
             ) : (
