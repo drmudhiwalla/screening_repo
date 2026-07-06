@@ -5,20 +5,25 @@ import {
   downloadRegistrationPdf,
   loadRegistrations as loadRegistrationsFromApi,
   loginAdmin,
-  sendReportWhatsappMessage,
+  sendReportPdfMessage,
   sendWhatsappMessage,
   syncAssessmentResponse,
   updateRegistrationRecord,
+  updateRegistrationVitals,
   type Registration,
 } from '../lib/demo';
 import {
   calculateBMI,
   calculateBRI,
+  calculateFamilyHistoryRisk,
   classifyBloodPressure,
-  getBmiCategory,
   getBmiStatus,
   getBloodPressureBadgeClasses,
   getBriStatus,
+  getFamilyHistoryBadgeClasses,
+  getRiskBadgeClasses,
+  getStressBadgeClasses,
+  getStressRiskColor,
 } from '../lib/medical';
 
 const ASSESSMENT_URL = process.env.NEXT_PUBLIC_ASSESSMENT_URL || 'https://docs.google.com/forms/d/e/1FAIpQLScaiud61RFRtgV-jcO1xY1FySX5YtZhmD7nbLqqFxUOR9ZPNQ/viewform?usp=sharing&ouid=118247222024506353673';
@@ -107,10 +112,9 @@ export default function AdminPage() {
     if (!parsedWeight || !parsedHeight) {
       return null;
     }
-    return calculateBMI(parsedWeight, parsedHeight);
+    return calculateBMI(parsedHeight, parsedWeight);
   }, [heightCm, weightKg]);
 
-  const bmiCategory = useMemo(() => getBmiCategory(bmiValue), [bmiValue]);
   const bmiStatus = useMemo(() => getBmiStatus(bmiValue), [bmiValue]);
   const briValue = useMemo(() => {
     const parsedHeight = Number(heightCm);
@@ -122,6 +126,45 @@ export default function AdminPage() {
   }, [heightCm, waistCm]);
 
   const briStatus = useMemo(() => getBriStatus(briValue), [briValue]);
+  const assessmentStatus = useMemo(() => {
+    const riskLevel = selected?.assessmentAnalysis?.sheetRiskLevel || selected?.assessmentAnalysis?.riskLevel || null;
+    const color = selected?.assessmentAnalysis?.riskColor || getStressRiskColor(riskLevel);
+    return {
+      label: color === 'green' ? 'Green' : color === 'yellow' ? 'Yellow' : color === 'red' ? 'Red' : 'Pending',
+      riskLevel: riskLevel || 'Pending',
+      color,
+      summary: selected?.assessmentAnalysis?.summary || 'Google Sheet assessment status not synced yet',
+      score: selected?.assessmentAnalysis?.sheetScore ?? selected?.assessmentAnalysis?.score ?? null,
+    };
+  }, [selected]);
+  const familyHistoryStatus = useMemo(() => {
+    if (!selected) {
+      return calculateFamilyHistoryRisk(null);
+    }
+
+    if (selected.familyHistoryRiskLevel || selected.familyHistorySummary) {
+      return {
+        label: selected.familyHistoryRiskColor === 'green'
+          ? 'Green'
+          : selected.familyHistoryRiskColor === 'yellow'
+            ? 'Yellow'
+            : selected.familyHistoryRiskColor === 'red'
+              ? 'Red'
+              : 'Pending',
+        riskLevel: selected.familyHistoryRiskLevel || 'Family history not submitted yet',
+        color: selected.familyHistoryRiskColor || 'grey',
+        summary: selected.familyHistorySummary || 'Family history not submitted yet',
+      };
+    }
+
+    return calculateFamilyHistoryRisk({
+      diabetes: selected.familyHistoryDiabetes,
+      hypertension: selected.familyHistoryHypertension,
+      heartDisease: selected.familyHistoryHeartDisease,
+      stroke: selected.familyHistoryStroke,
+      submitted: false,
+    });
+  }, [selected]);
 
   const isReadyForReview = useMemo(() => {
     if (!selected) return false;
@@ -161,14 +204,11 @@ export default function AdminPage() {
       heightCm: Number(heightCm) || null,
       weightKg: Number(weightKg) || null,
       waistCm: Number(waistCm) || null,
-      bmi: bmiValue,
-      bri: briValue,
-      bmiCategory,
-      briLabel: briStatus.label,
       status: selected.status === 'REGISTERED' ? 'SCREENING COMPLETED' : selected.status,
     };
 
-    await updateRegistrationRecord(selected.id, payload);
+    const updated = await updateRegistrationVitals(selected.id, payload);
+    syncFormFromRegistration(updated);
     setStatusMessage('Screening details saved.');
     await loadRegistrations(selected.id);
   };
@@ -225,7 +265,7 @@ export default function AdminPage() {
     setStatusMessage(`Syncing Google Form response for ${selected.name}...`);
     try {
       const updated = await syncAssessmentResponse(selected.id);
-      setStatusMessage(`Assessment response matched for ${updated.name}.`);
+      setStatusMessage(`Assessment response synced and saved to SQLite for ${updated.name}.`);
       syncFormFromRegistration(updated);
       await loadRegistrations(selected.id);
     } catch (error) {
@@ -261,15 +301,19 @@ export default function AdminPage() {
     }
 
     setIsSendingReportWhatsapp(true);
-    setStatusMessage(`Preparing report link for ${selected.name}...`);
+    setStatusMessage(`Preparing PDF report for ${selected.name}...`);
     try {
-      await syncAssessmentResponse(selected.id);
-      const result = await sendReportWhatsappMessage(selected.id, recipientNumber);
-      setStatusMessage(`Report sent to ${selected.name} on WhatsApp.`);
+      try {
+        await syncAssessmentResponse(selected.id);
+      } catch (error) {
+        setStatusMessage(error instanceof Error ? `${error.message} Sending report with available data...` : 'Sending report with available data...');
+      }
+      const result = await sendReportPdfMessage(selected.id, recipientNumber);
+      setStatusMessage(result.ok ? 'Report PDF sent successfully' : 'Failed to send PDF. Please retry.');
       syncFormFromRegistration(result.registration);
       await loadRegistrations(selected.id);
     } catch (error) {
-      setStatusMessage(error instanceof Error ? error.message : 'Unable to send report on WhatsApp right now.');
+      setStatusMessage(error instanceof Error ? `Failed to send PDF. Please retry. ${error.message}` : 'Failed to send PDF. Please retry.');
     } finally {
       setIsSendingReportWhatsapp(false);
     }
@@ -401,9 +445,8 @@ export default function AdminPage() {
                 </div>
 
                 <div className="mt-6 border border-slate-200 bg-slate-50 p-4">
-                  <div className="mb-4 flex items-center justify-between">
+                  <div className="mb-4">
                     <h3 className="text-lg font-semibold">Vitals & Screening</h3>
-                    <span className={`border px-3 py-1 text-sm font-medium ${getBloodPressureBadgeClasses(bpCategory)}`}>{bpCategory || 'Awaiting values'}</span>
                   </div>
                   <div className="grid gap-4 md:grid-cols-2">
                     <label className="block text-sm font-medium">
@@ -513,22 +556,47 @@ export default function AdminPage() {
                     </label>
                   </div>
 
-                  <div className="mt-4 grid gap-4 md:grid-cols-3">
+                  <div className="mt-4 grid gap-4 md:grid-cols-2">
                     <div className="border border-slate-200 bg-white p-4">
-                      <p className="text-sm text-slate-500">BMI</p>
-                      <p className="text-lg font-semibold">{bmiValue ?? '—'}</p>
-                      <p className="text-sm text-slate-600">{bmiCategory}</p>
-                      <span className={`mt-2 inline-flex border px-2 py-1 text-xs font-semibold ${bmiStatus.tone === 'green' ? 'border-emerald-200 bg-emerald-50 text-emerald-700' : bmiStatus.tone === 'amber' ? 'border-amber-200 bg-amber-50 text-amber-700' : bmiStatus.tone === 'red' ? 'border-red-200 bg-red-50 text-red-700' : 'border-slate-200 bg-slate-50 text-slate-600'}`}>{bmiStatus.label}</span>
+                      <p className="text-sm text-slate-500">Blood Pressure</p>
+                      <p className="text-lg font-semibold">{bpCategory || 'Awaiting values'}</p>
+                      <span className={`mt-3 inline-flex border px-3 py-1.5 text-sm font-semibold ${getBloodPressureBadgeClasses(bpCategory)}`}>
+                        {bpCategory || 'Pending'}
+                      </span>
                     </div>
                     <div className="border border-slate-200 bg-white p-4">
-                      <p className="text-sm text-slate-500">BRI</p>
-                      <p className="text-lg font-semibold">{briValue ?? '—'}</p>
-                      <span className={`mt-2 inline-flex border px-2 py-1 text-xs font-semibold ${briStatus.tone === 'green' ? 'border-emerald-200 bg-emerald-50 text-emerald-700' : briStatus.tone === 'amber' ? 'border-amber-200 bg-amber-50 text-amber-700' : briStatus.tone === 'red' ? 'border-red-200 bg-red-50 text-red-700' : 'border-slate-200 bg-slate-50 text-slate-600'}`}>{briStatus.label}</span>
+                      <p className="text-sm text-slate-500">Body Metrics</p>
+                      <div className="mt-3 grid gap-4 sm:grid-cols-2">
+                        <div>
+                          <p className="text-sm text-slate-500">BMI</p>
+                          <p className="text-lg font-semibold">{bmiValue ?? 'Not calculated'}</p>
+                          <span className={`mt-3 inline-flex border px-3 py-1.5 text-sm font-semibold ${getRiskBadgeClasses(bmiStatus.tone)}`}>{bmiStatus.label}</span>
+                        </div>
+                        <div className="border-t border-slate-200 pt-4 sm:border-l sm:border-t-0 sm:pl-4 sm:pt-0">
+                          <p className="text-sm text-slate-500">BRI</p>
+                          <p className="text-lg font-semibold">{briValue ?? 'Not calculated'}</p>
+                          <span className={`mt-3 inline-flex border px-3 py-1.5 text-sm font-semibold ${getRiskBadgeClasses(briStatus.tone)}`}>{briStatus.label}</span>
+                        </div>ß
+                      </div>
                     </div>
                     <div className="border border-slate-200 bg-white p-4">
-                      <p className="text-sm text-slate-500">Assessment</p>
-                      <p className="text-lg font-semibold">{selected.assessmentAnalysis?.riskLevel || bpCategory || 'Pending'}</p>
-                      <p className="text-sm text-slate-600">{selected.assessmentAnalysis ? selected.assessmentAnalysis.summary : 'Blood pressure classification'}</p>
+                      <p className="text-sm text-slate-500">Lifestyle Assessment</p>
+                      <p className="text-lg font-semibold">{assessmentStatus.riskLevel}</p>
+                      <span className={`mt-3 inline-flex border px-3 py-1.5 text-sm font-semibold ${getStressBadgeClasses(assessmentStatus.color)}`}>
+                        {assessmentStatus.label}
+                      </span>
+                      {assessmentStatus.score !== null ? (
+                        <p className="mt-2 text-sm text-slate-600">Score: {assessmentStatus.score}</p>
+                      ) : null}
+                      <p className="mt-3 text-sm text-slate-600">{assessmentStatus.summary}</p>
+                    </div>
+                    <div className="border border-slate-200 bg-white p-4">
+                      <p className="text-sm text-slate-500">Family History</p>
+                      <p className="text-lg font-semibold">{familyHistoryStatus.riskLevel}</p>
+                      <span className={`mt-3 inline-flex border px-3 py-1.5 text-sm font-semibold ${getFamilyHistoryBadgeClasses(familyHistoryStatus.color)}`}>
+                        {familyHistoryStatus.label}
+                      </span>
+                      <p className="mt-3 text-sm text-slate-600">{familyHistoryStatus.summary}</p>
                     </div>
                   </div>
                 </div>

@@ -122,6 +122,11 @@ export default function HomePage() {
               <p className="mt-2 text-sm leading-6 text-slate-500">Fields marked with an asterisk (*) are required.</p>
             </div>
 
+
+
+
+
+
             <div className="space-y-5">
               <label className="block">
                 <span className="mb-2 block text-sm font-semibold text-slate-800">Full name *</span>
@@ -189,6 +194,12 @@ export default function HomePage() {
                 Submit Consent & Register
               </button>
             </div>
+
+
+
+
+
+
 
             {status ? (
               <div role="status" className="mt-5 border border-slate-300 bg-slate-50 px-4 py-3 text-sm font-medium text-slate-900">

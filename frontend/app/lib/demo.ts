@@ -14,6 +14,7 @@ export type Registration = {
   assessmentUrl?: string | null;
   assessmentStatus?: string | null;
   assessmentSentAt?: string | null;
+  assessmentSyncedAt?: string | null;
   assessmentCompletedAt?: string | null;
   assessmentResponseUrl?: string | null;
   assessmentResponseData?: Record<string, unknown> | null;
@@ -22,6 +23,9 @@ export type Registration = {
     maxScore: number;
     percent: number;
     riskLevel: string;
+    riskColor?: 'green' | 'yellow' | 'red' | 'grey' | null;
+    sheetScore?: number | null;
+    sheetRiskLevel?: string | null;
     summary: string;
     recommendation?: string;
     focusAreas: string[];
@@ -31,6 +35,10 @@ export type Registration = {
   reportUrl?: string | null;
   reportSentAt?: string | null;
   reportError?: string | null;
+  reportPdfSentAt?: string | null;
+  reportPdfSendStatus?: string | null;
+  reportPdfProviderMessageId?: string | null;
+  reportPdfErrorMessage?: string | null;
   systolic?: number | null;
   diastolic?: number | null;
   bloodPressureCategory?: BloodPressureCategory | null;
@@ -44,6 +52,32 @@ export type Registration = {
   bri?: number | null;
   bmiCategory?: string | null;
   briLabel?: string | null;
+  bmiValue?: number | null;
+  bmiLevel?: string | null;
+  bmiColor?: 'green' | 'yellow' | 'red' | 'grey' | null;
+  bmiBadge?: string | null;
+  briValue?: number | null;
+  briLevel?: string | null;
+  briColor?: 'green' | 'yellow' | 'red' | 'grey' | null;
+  briBadge?: string | null;
+  familyHistoryDiabetes?: boolean | null;
+  familyHistoryHypertension?: boolean | null;
+  familyHistoryHeartDisease?: boolean | null;
+  familyHistoryStroke?: boolean | null;
+  familyHistoryRiskLevel?: string | null;
+  familyHistoryRiskColor?: 'green' | 'yellow' | 'red' | 'grey' | null;
+  familyHistorySummary?: string | null;
+  familyHistoryRaw?: string | null;
+  familyHistoryConditions?: string[];
+  medicalHistoryDiabetes?: boolean | null;
+  medicalHistoryHypertension?: boolean | null;
+  medicalHistoryHeartDisease?: boolean | null;
+  medicalHistoryHighCholesterol?: boolean | null;
+  medicalHistoryRiskLevel?: string | null;
+  medicalHistoryRiskColor?: 'green' | 'yellow' | 'red' | 'grey' | null;
+  medicalHistorySummary?: string | null;
+  medicalHistoryRaw?: string | null;
+  medicalHistoryConditions?: string[];
 };
 
 const API_BASE = process.env.NEXT_PUBLIC_API_URL || 'http://127.0.0.1:3101';
@@ -101,6 +135,13 @@ export const updateRegistrationRecord = async (id: number, payload: Partial<Regi
   });
 };
 
+export const updateRegistrationVitals = async (id: number, payload: Partial<Registration>) => {
+  return request<Registration>(`/api/registrations/${id}/vitals`, {
+    method: 'PUT',
+    body: JSON.stringify(payload),
+  });
+};
+
 export const sendWhatsappMessage = async (id: number, message: string, phoneNumber?: string, assessmentUrl?: string) => {
   return request<{ ok: boolean; message: string; provider?: string; registration: Registration }>(`/api/registrations/${id}/whatsapp`, {
     method: 'POST',
@@ -109,7 +150,14 @@ export const sendWhatsappMessage = async (id: number, message: string, phoneNumb
 };
 
 export const sendReportWhatsappMessage = async (id: number, phoneNumber?: string) => {
-  return request<{ ok: boolean; message: string; provider?: string; reportUrl: string; registration: Registration }>(`/api/registrations/${id}/report-whatsapp`, {
+  return request<{ ok: boolean; message: string; provider?: string; reportUrl: string; whatsappShareUrl?: string; registration: Registration }>(`/api/registrations/${id}/report-whatsapp`, {
+    method: 'POST',
+    body: JSON.stringify({ phoneNumber }),
+  });
+};
+
+export const sendReportPdfMessage = async (id: number, phoneNumber?: string) => {
+  return request<{ ok: boolean; message: string; provider?: string; filename?: string; providerMessageId?: string | null; registration: Registration }>(`/api/registrations/${id}/send-report-pdf`, {
     method: 'POST',
     body: JSON.stringify({ phoneNumber }),
   });
