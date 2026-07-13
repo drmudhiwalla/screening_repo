@@ -535,7 +535,7 @@ app.post('/api/registrations', (req, res) => {
   }
 });
 
-app.patch('/api/registrations/:id', (req, res) => {
+function updateRegistrationResponse(req, res) {
   const id = Number(req.params.id);
   if (!Number.isInteger(id)) {
     return res.status(400).json({ message: 'Invalid registration id' });
@@ -552,7 +552,12 @@ app.patch('/api/registrations/:id', (req, res) => {
   } catch (error) {
     return res.status(500).json({ message: error instanceof Error ? error.message : 'Failed to update registration' });
   }
-});
+}
+
+app.patch('/api/registrations/:id', updateRegistrationResponse);
+app.patch('/api/registration/:id', updateRegistrationResponse);
+app.put('/api/registrations/:id/vitals', updateRegistrationResponse);
+app.put('/api/registration/:id/vitals', updateRegistrationResponse);
 
 app.post('/api/registrations/:id/whatsapp', async (req, res) => {
   const id = Number(req.params.id);
