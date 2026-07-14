@@ -47,7 +47,7 @@ export default function HomePage() {
         <header className="mb-6 flex items-center justify-between border-b border-slate-200 pb-4">
           <div>
             <img src="/images/image.jpeg" alt="Logo" className="h-10 w-auto" />
-            <p className="mt-2 text-sm text-slate-500">Preventive Health Screeningggg</p>
+            <p className="mt-2 text-sm text-slate-500">Preventive Health Screening</p>
           </div>
 
           <a href="/admin" className="text-sm font-medium text-slate-700 hover:text-slate-950">
